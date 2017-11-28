@@ -1,0 +1,1078 @@
+---
+title: "Untitled"
+author: "Thomas Schindler"
+date: "29 November 2017"
+output: html_document
+    revealjs::revealjs_presentation:
+    theme: moon
+    incremental: true
+    center: true
+    fig_width: 7
+    fig_height: 6
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+---
+
+## Background
+
+Here I focus on data analysis sampled during Summer School 2017 in Agali forest.
+Any collected data belong to greenhouse gas emissions by grey alder stems during the experiment phase. Basically, the experiment consisted of three periods - before, during, and afterartificial irrigation of the forest. There are two groups of stem chambers, one located at the irrigation area (Tree 01 - 08, 12), the control group consists of trees 09-11. Further, the stem chambers are located on three heights. Exceptions are made at trees: 01, 05, 07, and 10 where chambers are situated at the bottom level only.
+
+---
+
+## Libraries to load
+
+```{r Libraries, echo=TRUE, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(tidyr)
+library(ggthemes)
+library(xtable)
+library(ggplot2)
+library(stringr)
+library(scales)
+library(cowplot)
+library(Rmisc)
+library(dplyr)
+```
+
+---
+
+## N2O Data Import
+
+- Select my file and read data into 'dat' dataframe
+- File contains N20 fluxes for the SummerSchool irrigation experiment only.
+- For extended time slots, another file (see below) will be used.
+
+---
+
+```{r Data Input}
+dat<- read.csv("n2oR.csv", header = TRUE)
+```
+
+---
+```{r}
+dat
+```
+
+---
+
+## Data are still in wrong format (wide instead of long)
+
+Thus, original data table needs to be converted /gathered - library 'tidyr' to be added to library list at the beginning
+
+The arguments to gather():
+- data: Data object
+- key: Name of new key column (made from names of data columns)
+- value: Name of new value column
+- ...: Names of source columns that contain values
+- factor_key: Treat the new key column as a factor (instead of character vector)
+
+---
+
+### Re-Organising Data Colums, experimental sites
+
+Zero level, experimental site
+```{r, echo=TRUE}
+  n2o0 <- gather(dat, "olevel", "flux", Tree1h0:Tree12h0, factor_key=TRUE)
+```
+
+---
+
+```{r}
+n2o0
+```
+
+---
+
+80cm Level, experimental site
+```{r}
+  n2o80 <- gather(dat, "80level", "flux", Tree2h80:Tree12h80, factor_key=TRUE)
+```
+
+--- 
+```{r}
+n2o80
+```
+
+---
+
+170cm Level, experimental site
+```{r}
+  n2o170 <- gather(dat, "170level", "flux", Tree2h170:Tree12h170, factor_key=TRUE)
+```
+
+---
+
+```{r}
+n2o170
+```
+
+---
+
+## Re-Organising Data Colums, control sites
+
+```{r}
+  n2o0c <- gather(dat, "olevelC", "flux", Tree9h0:Tree11h0, factor_key=TRUE)
+```
+
+---
+
+```{r}
+n2o0c
+```
+
+---
+
+80cm Level, experimental site
+```{r}
+  n2o80c <- gather(dat, "80levelC", "flux", Tree9h80:Tree11h80, factor_key=TRUE)
+```
+
+---
+
+```{r}
+  n2o80c
+```
+
+---
+
+170cm Level, experimental site
+```{r}
+  n2o170c <- gather(dat, "170levelC", "flux", Tree9h170:Tree11h170, factor_key=TRUE)
+```
+
+---
+
+```{r}
+n2o170c
+```
+
+---
+
+## ! Data now look much better
+
+---
+
+## N2O Boxplots from Experimental Site, no control spots, Level 0/80/170 cm
+
+---
+
+```{r}
+  e1 <- ggplot(n2o0, 
+              aes(x=Sampled,
+                  y=flux))
+  e1 <- e1 + 
+        geom_boxplot(fill="blue", alpha=0.2) + 
+          ggtitle("N2O, Level 0cm") +
+          labs(x="Sampling Dates", y="N2O flux") +
+          theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=18, hjust=0)) +
+          theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+          scale_y_continuous(name="flux in myg/m-2 h-1", limits=c(0, 20)) 
+```
+
+---
+
+```{r N2OExp0level, echo=FALSE, message=FALSE, warning=FALSE}
+  e1
+```
+
+---
+
+```{r n2o80cm, message=FALSE, warning=FALSE}
+  e2 <- ggplot(n2o80, 
+              aes(x=Sampled,
+                  y=flux))
+  e2 <- e2 + 
+        geom_boxplot(fill="blue", alpha=0.2) + 
+          ggtitle("N2O, Level 80cm") +
+          labs(x="Sampling Dates", y="N2O flux") +
+          theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=18, hjust=0)) +
+          theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+          scale_y_continuous(name="flux in myg/m-2 h-1", limits=c(0, 20)) 
+```
+
+--- 
+
+```{r, warning=FALSE}
+  e2
+```
+
+---
+
+```{r}
+  e3 <- ggplot(n2o170, 
+              aes(x=Sampled,
+                  y=flux))
+  e3 <- e3 + 
+        geom_boxplot(fill="blue", alpha=0.2) + 
+          ggtitle("N2O, Level 180cm") +
+          labs(x="Sampling Dates", y="N2O flux") +
+          theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=18, hjust=0)) +
+          theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+          scale_y_continuous(name="flux in myg/m-2 h-1", limits=c(0, 20)) 
+```
+
+---
+
+```{r, warning=FALSE}
+  e3
+```
+
+---
+
+## Multiplot Plot N2O Fluxes from Experimental Sites somehow produces S***
+
+---
+
+
+```{r, warning=FALSE}
+    library(gridExtra)
+    library(grid)
+   grid.arrange(e1, e2, e3, ncol=3)
+```
+
+---
+
+## N2O Boxplots from Control Site, no control spots, Level 0/80/170 cm
+
+--- 
+
+```{r}
+  c1 <- ggplot(n2o0c, 
+              aes(x=Sampled,
+                  y=flux))
+  c1 <- c1 + 
+        geom_boxplot(fill="blue", alpha=0.2) + 
+          ggtitle("Control site: N2O in myg/m-2 h-1, Level 0cm") +
+          labs(x="Sampling Dates", y="N2O flux") +
+          theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=18, hjust=0)) +
+          theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+          scale_y_continuous(name="flux in", limits=c(0, 20)) 
+```
+
+---
+
+```{r, warning=FALSE}
+  c1
+```
+
+---
+
+```{r}
+  c2 <- ggplot(n2o80c, 
+              aes(x=Sampled,
+                  y=flux))
+  c2 <- c2 + 
+        geom_boxplot(fill="blue", alpha=0.2) + 
+          ggtitle("Control site: N2O in  myg/m-2 h-1, Level 80cm") +
+          labs(x="Sampling Dates", y="N2O flux") +
+          theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=18, hjust=0)) +
+          theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+          scale_y_continuous(name="flux in", limits=c(0, 20)) 
+```
+
+---
+
+```{r, warning=FALSE}
+  c2
+```
+
+---
+
+```{r}
+  c3 <- ggplot(n2o170c, 
+              aes(x=Sampled,
+                  y=flux))
+  c3 <- c3 + 
+        geom_boxplot(fill="blue", alpha=0.2) + 
+          ggtitle("Control site: N2O in myg/m-2 h-1, Level 180cm") +
+          labs(x="Sampling Dates", y="N2O flux") +
+          theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=18, hjust=0)) +
+          theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+          scale_y_continuous(name="flux in", limits=c(0, 20)) 
+```
+
+---
+```{r, warning=FALSE}
+  c3
+```
+
+---
+
+
+## Still try to implement the three treem stem levels output into one plot
+
+
+---
+
+# TODOS
+
+- one plot per level, each per experiment and control sites
+- Plots according to extra data: humidity and temperature, regression
+- Check the statistical relevance
+- Normal distribution (Shapirov)
+
+--- 
+
+# Normal Distribution ?
+ 
+---
+
+```{r}
+shapiro.test(n2o0$flux)
+```
+
+---
+
+## Normal distribution assumed.
+
+---
+
+# Extra Tests with CH4
+
+--- 
+
+## Data Import,
+Select my file and read data into 'dat' dataframe
+File contains N20 fluxes for the SummerSchool irrigation experiment only.
+For extended time slots, another file (see below) will be used.
+
+--- 
+```{r}
+ch4<- read.csv("ch4R.csv", header = TRUE)
+```
+
+---
+
+```{r}
+ch4
+```
+
+---
+
+## Check Table View
+
+---
+
+```{r}
+  head(ch4)
+```
+
+---
+
+## Data are still in wrong format (wide instead of long)
+
+Thus, original data table needs to be converted /gathered - library 'tidyr' to be added to library list at the beginning
+
+The arguments to gather():
+ - data: Data object
+ - key: Name of new key column (made from names of data columns)
+ - value: Name of new value column
+ - ...: Names of source columns that contain values
+ - factor_key: Treat the new key column as a factor (instead of character vector)
+
+---
+
+## Re-Organising Data Colums, experimental sites
+
+Zero level, experimental site
+```{r}
+  ch40 <- gather(ch4, "olevel", "flux", Tree1h0:Tree12h0, factor_key=TRUE)
+ch40
+```
+
+---
+
+80cm Level, experimental site
+```{r}
+  ch480 <- gather(ch4, "80level", "flux", Tree2h80:Tree12h80, factor_key=TRUE)
+```
+
+---
+
+```{r}
+ch480
+
+```
+
+---
+
+170cm Level, experimental site
+```{r}
+  ch4170 <- gather(ch4, "170level", "flux", Tree2h170:Tree12h170, factor_key=TRUE)
+```
+
+---
+
+```{r}
+ch4170
+```
+
+---
+
+## Re-Organising Data Colums, control sites
+
+---
+
+```{r}
+  ch40c <- gather(ch4, "olevelC", "flux", Tree9h0:Tree11h0, factor_key=TRUE)
+```
+
+---
+
+```{r}
+ch40c
+```
+
+---
+
+80cm Level, experimental site
+```{r}
+  ch480c <- gather(ch4, "80levelC", "flux", Tree9h80:Tree11h80, factor_key=TRUE)
+```
+
+---
+
+```{r}
+ch480c
+```
+
+---
+
+170cm Level, experimental site
+```{r}
+  ch4170c <- gather(ch4, "170levelC", "flux", Tree9h170:Tree11h170, factor_key=TRUE)
+```
+
+---
+
+```{r}
+ch4170c
+```
+
+---
+
+## CH4 Boxplots from Experimental Site, no control spots, Level 0/80/170 cm
+
+```{r}
+  ch1 <- ggplot(ch40, 
+              aes(x=Sampled,
+                  y=flux))
+  ch1 <- ch1 + 
+        geom_boxplot(fill="blue", alpha=0.2) + 
+          ggtitle("CH4, Level 0cm") +
+          labs(x="Sampling Dates", y="CH4 flux") +
+          theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=18, hjust=0)) +
+          theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+          scale_y_continuous(name="flux in myg/m-2 h-1", limits=c(0, 20)) 
+```
+
+---
+
+```{r, warning=FALSE}
+ch1
+```
+
+---
+
+```{r}
+  ch2 <- ggplot(ch480, 
+              aes(x=Sampled,
+                  y=flux))
+  ch2 <- ch2 + 
+        geom_boxplot(fill="blue", alpha=0.2) + 
+          ggtitle("CH4, Level 80cm") +
+          labs(x="Sampling Dates", y="CH4 flux") +
+          theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=18, hjust=0)) +
+          theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+          scale_y_continuous(name="flux in myg/m-2 h-1", limits=c(0, 20)) 
+```
+
+---
+
+```{r, warning=FALSE}
+  ch2
+```
+
+---
+
+```{r}
+  ch3 <- ggplot(ch4170, 
+              aes(x=Sampled,
+                  y=flux))
+  ch3 <- ch3 + 
+        geom_boxplot(fill="blue", alpha=0.2) + 
+          ggtitle("CH4, Level 180cm") +
+          labs(x="Sampling Dates", y="CH4 flux") +
+          theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=18, hjust=0)) +
+          theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+          scale_y_continuous(name="flux in myg/m-2 h-1", limits=c(0, 20)) 
+```
+
+---
+```{r, warning=FALSE}
+  ch3
+```
+
+---
+
+## CH4 Boxplots from Control Site, no control spots, Level 0/80/170 cm
+
+```{r}
+  chc1 <- ggplot(ch40c, 
+              aes(x=Sampled,
+                  y=flux))
+  chc1 <- chc1 + 
+        geom_boxplot(fill="blue", alpha=0.2) + 
+          ggtitle("Control site: CH4, Level 0cm") +
+          labs(x="Sampling Dates", y="CH4 flux") +
+          theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=18, hjust=0)) +
+          theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+          scale_y_continuous(name="flux in myg/m-2 h-1", limits=c(0, 20)) 
+```
+
+---
+
+```{r, warning=FALSE}
+  chc1
+```
+
+---
+
+```{r}
+  chc2 <- ggplot(ch480c, 
+              aes(x=Sampled,
+                  y=flux))
+  chc2 <- chc2 + 
+        geom_boxplot(fill="blue", alpha=0.2) + 
+          ggtitle("Control site: CH4, Level 80cm") +
+          labs(x="Sampling Dates", y="CH4 flux") +
+          theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=18, hjust=0)) +
+          theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+          scale_y_continuous(name="flux in myg/m-2 h-1", limits=c(0, 5)) 
+```
+
+---
+```{r, warning=FALSE}
+chc2
+```
+
+---
+
+```{r}
+  chc3 <- ggplot(ch4170c, 
+              aes(x=Sampled,
+                  y=flux))
+  chc3 <- chc3 + 
+        geom_boxplot(fill="blue", alpha=0.2) + 
+          ggtitle("Control site: CH4, Level 180cm") +
+          labs(x="Sampling Dates", y="CH4 flux") +
+          theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=18, hjust=0)) +
+          theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+          scale_y_continuous(name="flux in myg/m-2 h-1", limits=c(0, 10)) 
+```
+
+---
+```{r, warning=FALSE}
+  chc3
+```
+
+
+# Extra Tests with CO2
+
+--- 
+
+## Data Import,
+Select my file and read data into 'dat' dataframe
+File contains CO2 fluxes for the SummerSchool irrigation experiment only.
+For extended time slots, another file (see below) will be used.
+
+--- 
+```{r}
+co2<- read.csv("co2R.csv", header = TRUE)
+```
+
+---
+
+```{r}
+co2
+```
+
+---
+
+## Check Table View
+
+---
+
+```{r}
+  head(co2)
+```
+
+---
+
+## Data are still in wrong format (wide instead of long)
+
+Thus, original data table needs to be converted /gathered - library 'tidyr' to be added to library list at the beginning
+
+The arguments to gather():
+ - data: Data object
+ - key: Name of new key column (made from names of data columns)
+ - value: Name of new value column
+ - ...: Names of source columns that contain values
+ - factor_key: Treat the new key column as a factor (instead of character vector)
+
+---
+
+## Re-Organising Data Colums, experimental sites
+
+Zero level, experimental site
+```{r}
+  co20 <- gather(co2, "olevel", "flux", Tree1h0:Tree12h0, factor_key=TRUE)
+co20
+```
+
+---
+
+80cm Level, experimental site
+```{r}
+  co280 <- gather(co2, "80level", "flux", Tree2h80:Tree12h80, factor_key=TRUE)
+```
+
+---
+
+```{r}
+co280
+
+```
+
+---
+
+170cm Level, experimental site
+```{r}
+  co2170 <- gather(co2, "170level", "flux", Tree2h170:Tree12h170, factor_key=TRUE)
+```
+
+---
+
+```{r}
+co2170
+```
+
+---
+
+## Re-Organising Data Colums, control sites
+
+---
+
+```{r}
+  co20c <- gather(co2, "olevelC", "flux", Tree9h0:Tree11h0, factor_key=TRUE)
+```
+
+---
+
+```{r}
+co20c
+```
+
+---
+
+80cm Level, experimental site
+```{r}
+  co280c <- gather(co2, "80levelC", "flux", Tree9h80:Tree11h80, factor_key=TRUE)
+```
+
+---
+
+```{r}
+co280c
+```
+
+---
+
+170cm Level, experimental site
+```{r}
+  co2170c <- gather(co2, "170levelC", "flux", Tree9h170:Tree11h170, factor_key=TRUE)
+```
+
+---
+
+```{r}
+co2170c
+```
+
+---
+
+## CO2 Boxplots from Experimental Site, no control spots, Level 0/80/170 cm
+
+```{r}
+  co21 <- ggplot(co20, 
+              aes(x=Sampled,
+                  y=flux))
+  co21 <- co21 + 
+        geom_boxplot(fill="blue", alpha=0.2) + 
+          ggtitle("CO2mob, Level 0cm") +
+          labs(x="Sampling Dates", y="CO2 flux") +
+          theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=18, hjust=0)) +
+          theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+          scale_y_continuous(name="flux in g/m-2 h-1", limits=c(0, 2)) 
+```
+
+---
+
+```{r, warning=FALSE}
+co21
+```
+
+---
+
+```{r}
+  co22 <- ggplot(co280, 
+              aes(x=Sampled,
+                  y=flux))
+  co22 <- co22 + 
+        geom_boxplot(fill="blue", alpha=0.2) + 
+          ggtitle("CO2mob, Level 80cm") +
+          labs(x="Sampling Dates", y="CO2 flux") +
+          theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=18, hjust=0)) +
+          theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+          scale_y_continuous(name="flux in g/m-2 h-1", limits=c(0, 2)) 
+```
+
+---
+
+```{r, warning=FALSE}
+  co22
+```
+
+---
+
+```{r}
+  co23 <- ggplot(co2170, 
+              aes(x=Sampled,
+                  y=flux))
+  co23 <- co23 + 
+        geom_boxplot(fill="blue", alpha=0.2) + 
+          ggtitle("CO2mob, Level 180cm") +
+          labs(x="Sampling Dates", y="CO2 flux") +
+          theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=18, hjust=0)) +
+          theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+          scale_y_continuous(name="flux in g/m-2 h-1", limits=c(0, 2)) 
+```
+
+---
+```{r, warning=FALSE}
+  co23
+```
+
+---
+
+## CO2 Boxplots from Control Site, no control spots, Level 0/80/170 cm
+
+```{r}
+  co2c1 <- ggplot(co20c, 
+              aes(x=Sampled,
+                  y=flux))
+  co2c1 <- co2c1 + 
+        geom_boxplot(fill="blue", alpha=0.2) + 
+          ggtitle("Control site: CO2mob, Level 0cm") +
+          labs(x="Sampling Dates", y="CO2 flux") +
+          theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=18, hjust=0)) +
+          theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+          scale_y_continuous(name="flux in g/m-2 h-1", limits=c(0, 2)) 
+```
+
+---
+
+```{r, warning=FALSE}
+  co2c1
+```
+
+---
+
+```{r}
+  co2c2 <- ggplot(co280c, 
+              aes(x=Sampled,
+                  y=flux))
+  co2c2 <- co2c2 + 
+        geom_boxplot(fill="blue", alpha=0.2) + 
+          ggtitle("Control site: CO2mob, Level 80cm") +
+          labs(x="Sampling Dates", y="CO2 flux") +
+          theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=18, hjust=0)) +
+          theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+          scale_y_continuous(name="flux in g/m-2 h-1", limits=c(0, 1)) 
+```
+
+---
+```{r, warning=FALSE}
+co2c2
+```
+
+---
+
+```{r}
+  co2c3 <- ggplot(co2170c, 
+              aes(x=Sampled,
+                  y=flux))
+  co2c3 <- co2c3 + 
+        geom_boxplot(fill="blue", alpha=0.2) + 
+          ggtitle("Control site: CO2mob, Level 180cm") +
+          labs(x="Sampling Dates", y="CO2 flux") +
+          theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=18, hjust=0)) +
+          theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+          scale_y_continuous(name="flux in g/m-2 h-1", limits=c(0, 1)) 
+```
+
+---
+```{r, warning=FALSE}
+  co2c3
+```
+
+---
+
+## N2O AT NIGHT NOW !!!
+
+---
+
+```{r}
+n2on <- read.csv("n2on.csv", header = TRUE)
+```
+
+---
+```{r}
+n2on
+```
+
+---
+
+### Re-Organising Data Colums, experimental sites
+
+Zero level, experimental site
+```{r, echo=TRUE}
+  n2on0 <- gather(n2on, "olevel", "flux", Tree1h0:Tree12h0, factor_key=TRUE)
+```
+
+---
+
+```{r}
+n2on0
+```
+
+---
+
+80cm Level, experimental site
+```{r}
+  n2on80 <- gather(n2on, "80level", "flux", Tree2h80:Tree12h80, factor_key=TRUE)
+```
+
+--- 
+```{r}
+n2on80
+```
+
+---
+
+170cm Level, experimental site
+```{r}
+  n2on170 <- gather(n2on, "170level", "flux", Tree2h170:Tree12h170, factor_key=TRUE)
+```
+
+---
+
+```{r}
+n2on170
+```
+
+---
+
+## Re-Organising Data Colums, control sites
+
+```{r}
+  n2on0c <- gather(n2on, "olevelC", "flux", Tree9h0:Tree11h0, factor_key=TRUE)
+```
+
+---
+
+```{r}
+n2on0c
+```
+
+---
+
+80cm Level, experimental site
+```{r}
+  n2on80c <- gather(n2on, "80levelC", "flux", Tree9h80:Tree11h80, factor_key=TRUE)
+```
+
+---
+
+```{r}
+  n2on80c
+```
+
+---
+
+170cm Level, experimental site
+```{r}
+  n2on170c <- gather(n2on, "170levelC", "flux", Tree9h170:Tree11h170, factor_key=TRUE)
+```
+
+---
+
+```{r}
+n2on170c
+```
+
+---
+
+## ! Data now look much better
+
+---
+
+## N2O Night Boxplots from Experimental Site, no control spots, Level 0/80/170 cm
+
+---
+
+```{r}
+  n1 <- ggplot(n2on0, 
+              aes(x=Sampled,
+                  y=flux))
+  n1 <- n1 + 
+        geom_boxplot(fill="blue", alpha=0.2) + 
+          ggtitle("N2O Night, Level 0cm") +
+          labs(x="Sampling Dates", y="N2O flux") +
+          theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=18, hjust=0)) +
+          theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+          scale_y_continuous(name="flux in myg/m-2 h-1", limits=c(0, 20)) 
+```
+
+---
+
+```{r, warning=FALSE}
+  n1
+```
+
+---
+
+```{r n2on80cm, message=FALSE, warning=TRUE}
+  n2 <- ggplot(n2on80, 
+              aes(x=Sampled,
+                  y=flux))
+  n2 <- n2 + 
+        geom_boxplot(fill="blue", alpha=0.2) + 
+          ggtitle("N2O Night, Level 80cm") +
+          labs(x="Sampling Dates", y="N2O flux") +
+          theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=18, hjust=0)) +
+          theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+          scale_y_continuous(name="flux in myg/m-2 h-1", limits=c(0, 20)) 
+```
+
+--- 
+
+```{r, warning=FALSE}
+  n2
+```
+
+---
+
+```{r}
+  n3 <- ggplot(n2on170, 
+              aes(x=Sampled,
+                  y=flux))
+  n3 <- n3 + 
+        geom_boxplot(fill="blue", alpha=0.2) + 
+          ggtitle("N2O night, Level 180cm") +
+          labs(x="Sampling Dates", y="N2O flux") +
+          theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=18, hjust=0)) +
+          theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+          scale_y_continuous(name="flux in myg/m-2 h-1", limits=c(0, 20)) 
+```
+
+---
+
+```{r, warning=FALSE}
+  n3
+```
+
+---
+
+## Multiplot Plot N2O NIGHT Fluxes from Experimental Sites somehow produces S***
+
+---
+
+```{r, warning=FALSE}
+    library(gridExtra)
+    library(grid)
+   grid.arrange(n1, n2, n3, ncol=3)
+```
+
+---
+
+## N2O Boxplots NIGHT from Control Site, no control spots, Level 0/80/170 cm
+
+--- 
+
+```{r}
+  nn1 <- ggplot(n2on0c, 
+              aes(x=Sampled,
+                  y=flux))
+  nn1 <- nn1 + 
+        geom_boxplot(fill="blue", alpha=0.2) + 
+          ggtitle("Control site: N2O Night, Level 0cm") +
+          labs(x="Sampling Dates", y="N2O flux") +
+          theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=18, hjust=0)) +
+          theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+          scale_y_continuous(name="flux in myg/m-2 h-1", limits=c(0, 20)) 
+```
+
+---
+
+```{r, warning=TRUE}
+  nn1
+```
+
+---
+
+```{r}
+  nn2 <- ggplot(n2on80c, 
+              aes(x=Sampled,
+                  y=flux))
+  nn2 <- nn2 + 
+        geom_boxplot(fill="blue", alpha=0.2) + 
+          ggtitle("Control site: N2O Night, Level 80cm") +
+          labs(x="Sampling Dates", y="N2O flux") +
+          theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=18, hjust=0)) +
+          theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+          scale_y_continuous(name="flux inmyg/m-2 h-1", limits=c(0, 20)) 
+```
+
+---
+
+```{r, warning=TRUE}
+  nn2
+```
+
+---
+
+```{r}
+  nn3 <- ggplot(n2on170c, 
+              aes(x=Sampled,
+                  y=flux))
+  nn3 <- nn3 + 
+        geom_boxplot(fill="blue", alpha=0.2) + 
+          ggtitle("Control site: N2O Night, Level 180cm") +
+          labs(x="Sampling Dates", y="N2O flux") +
+          theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=18, hjust=0)) +
+          theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+          scale_y_continuous(name="flux in myg/m-2 h-1", limits=c(0, 20)) 
+```
+
+---
+```{r, warning=TRUE}
+  nn3
+```
+
+---
