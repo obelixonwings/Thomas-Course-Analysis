@@ -1,0 +1,67 @@
+---
+title: "analysis markdown"
+author: "Thomas Schindler"
+date: "21 November 2017"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## R Markdown
+
+This is an R Markdown presentation. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Thomas Analysis of Summer School' 2017 Data
+Here I focus on data analysis sampled during Summer School 2017 in Agali forest.
+Any collected data belong to greenhouse gas emissions by grey alder stems during the experiment phase. Basically, the experiment consisted of three periods - before, during, and afterartificial irrigation of the forest.
+
+## Libraries to load
+library(tidyverse)
+library(ggthemes)
+library(xtable)
+library(ggplot2)
+library(dplyr)
+
+## Basic Steps
+
+# Data Import,
+# Select my file and read data into 'dat' dataframe
+```{r}
+dat<- read.csv("n2oR.csv", header = TRUE)
+```
+
+# Check Table View
+
+```{r}
+  head(dat)
+```
+
+# Data Validation (format numeric)
+```{r}
+str(dat)
+```
+
+
+# Initial Plot,  x - date, y - fluxes of the different trees and heights
+```{r}
+  hist(dat$Tree3h0)
+```
+
+# another basic plot option to see what happens
+```{r}
+```
+
+
+
+
+## Check for Normal distribution
+## Boxplots over time 
+## Plots according to extra data: humidity and temperature, regression

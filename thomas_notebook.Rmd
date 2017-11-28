@@ -1,0 +1,66 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Thomas Analysis of Summer School' 2017 Data
+Here I focus on data analysis sampled during Summer School 2017 in Agali forest.
+Any collected data belong to greenhouse gas emissions by grey alder stems during the experiment phase. Basically, the experiment consisted of three periods - before, during, and afterartificial irrigation of the forest.
+
+## Libraries to load
+library(tidyverse)
+library(tidyr)
+library(ggthemes)
+library(xtable)
+library(ggplot2)
+library(dplyr)
+library(stringr)
+
+## Basic Steps
+
+# Data Import,
+# Select my file and read data into 'dat' dataframe
+```{r}
+dat<- read.csv("n2oR.csv", header = TRUE)
+```
+
+# Check Table View
+
+```{r}
+  head(dat)
+```
+
+# Data are still in wrong format (wide instead of long)
+# Thus, original data table needs to be converted /gathered - library 'tidyr' to be added to library list at the beginning
+
+# The arguments to gather():
+# - data: Data object
+# - key: Name of new key column (made from names of data columns)
+# - value: Name of new value column
+# - ...: Names of source columns that contain values
+# - factor_key: Treat the new key column as a factor (instead of character vector)
+
+```{r}
+  dat_long <- gather(dat, chamber, flux, Tree1ho:Tree12h170, factor_key=TRUE)
+dat_long
+
+```
+
+
+
+# Data Validation (format numeric)
+```{r}
+str(dat)
+```
+
+
+
+## STILL TO DO
+## Check for Normal distribution
+## T-test
+## Boxplots over time 
+## Plots according to extra data: humidity and temperature, regression
